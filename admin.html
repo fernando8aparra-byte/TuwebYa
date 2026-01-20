@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <style>
+        /* Diseño básico en blanco y negro, sin estética avanzada */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: black;
+        }
+
+        header {
+            padding: 10px;
+            border-bottom: 1px solid black;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        section {
+            padding: 20px;
+            border-bottom: 1px solid black;
+        }
+
+        input, textarea, select, button {
+            border: 1px solid black;
+            padding: 5px;
+            margin: 5px 0;
+        }
+
+        .atajo-item, .contenido-item {
+            border: 1px solid gray;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        footer {
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Panel de Administración</h1>
+        <div class="login-section">
+            <button id="login-btn">Iniciar Sesión</button>
+            <div id="login-form" class="hidden">
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="password" placeholder="Contraseña">
+                <button id="submit-login">Entrar</button>
+            </div>
+            <button id="logout-btn" class="hidden">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <main id="admin-content" class="hidden">
+        <!-- Título Principal -->
+        <section id="titulo-principal-section">
+            <h2>Título Principal</h2>
+            <input type="text" id="titulo-principal-input" placeholder="Título Principal">
+            <button id="save-titulo-principal">Guardar</button>
+        </section>
+
+        <!-- Secciones 1-3 -->
+        <section id="secciones-section">
+            <h2>Secciones</h2>
+            <div id="seccion1-admin">
+                <h3>Sección 1</h3>
+                <input type="text" id="titulo-seccion1-input" placeholder="Título Sección 1">
+                <div id="contenido-seccion1-admin">
+                    <!-- Contenidos dinámicos se cargan aquí -->
+                </div>
+                <button class="add-contenido" data-seccion="1">Agregar Contenido</button>
+                <button class="save-seccion" data-seccion="1">Guardar Sección 1</button>
+            </div>
+            <div id="seccion2-admin">
+                <h3>Sección 2</h3>
+                <input type="text" id="titulo-seccion2-input" placeholder="Título Sección 2">
+                <div id="contenido-seccion2-admin">
+                    <!-- Contenidos dinámicos se cargan aquí -->
+                </div>
+                <button class="add-contenido" data-seccion="2">Agregar Contenido</button>
+                <button class="save-seccion" data-seccion="2">Guardar Sección 2</button>
+            </div>
+            <div id="seccion3-admin">
+                <h3>Sección 3</h3>
+                <input type="text" id="titulo-seccion3-input" placeholder="Título Sección 3">
+                <div id="contenido-seccion3-admin">
+                    <!-- Contenidos dinámicos se cargan aquí -->
+                </div>
+                <button class="add-contenido" data-seccion="3">Agregar Contenido</button>
+                <button class="save-seccion" data-seccion="3">Guardar Sección 3</button>
+            </div>
+        </section>
+
+        <!-- Atajos -->
+        <section id="atajos-section">
+            <h2>Atajos (Máximo 6)</h2>
+            <div id="atajos-list">
+                <!-- Atajos dinámicos se cargan aquí -->
+            </div>
+            <button id="add-atajo">Agregar Atajo</button>
+            <button id="save-atajos">Guardar Atajos</button>
+        </section>
+
+        <!-- Redes Sociales -->
+        <section id="redes-section">
+            <h2>Redes Sociales</h2>
+            <div id="redes-list">
+                <!-- Redes dinámicas -->
+            </div>
+            <button id="save-redes">Guardar Redes</button>
+        </section>
+
+        <!-- Banner de Mantenimiento -->
+        <section id="mantenimiento-section">
+            <h2>Banner de Mantenimiento</h2>
+            <label>
+                <input type="checkbox" id="mantenimiento-toggle"> Activar
+            </label>
+            <button id="save-mantenimiento">Guardar</button>
+        </section>
+
+        <!-- Banner con Imagen -->
+        <section id="banner-section">
+            <h2>Banner con Imagen</h2>
+            <input type="text" id="banner-imagen-input" placeholder="URL de la Imagen">
+            <button id="save-banner">Guardar</button>
+        </section>
+    </main>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
+        import { getDatabase, ref as dbRef, get, set, push, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCSu34Ls6HzmX1ANI19KPzttAKTqf5bDxY",
+          authDomain: "tuwebyaa-da5a4.firebaseapp.com",
+          projectId: "tuwebyaa-da5a4",
+          storageBucket: "tuwebyaa-da5a4.firebasestorage.app",
+          messagingSenderId: "978686266841",
+          appId: "1:978686266841:web:33ffcb2ff2965589151dc8",
+          measurementId: "G-X1FY1MR0M7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        const adminContent = document.getElementById('admin-content');
+        const loginBtn = document.getElementById('login-btn');
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitLogin = document.getElementById('submit-login');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Monitorear estado de autenticación
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Asumimos que cualquier usuario logueado es admin por simplicidad
+                adminContent.classList.remove('hidden');
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                loadAdminData();
+            } else {
+                adminContent.classList.add('hidden');
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+        });
+
+        loginBtn.addEventListener('click', () => {
+            loginForm.classList.toggle('hidden');
+        });
+
+        submitLogin.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            signInWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    console.log('Admin logueado');
+                    loginForm.classList.add('hidden');
+                })
+                .catch(error => console.error('Error en login:', error));
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                console.log('Sesión cerrada');
+            }).catch(error => console.error('Error en logout:', error));
+        });
+
+        // Función para cargar datos iniciales en el admin
+        async function loadAdminData() {
+            // Título Principal
+            get(dbRef(db, 'config/titulo_principal')).then(snapshot => {
+                document.getElementById('titulo-principal-input').value = snapshot.val() || '';
+            });
+
+            // Secciones
+            ['1', '2', '3'].forEach(async num => {
+                get(dbRef(db, `config/seccion${num}/titulo`)).then(snapshot => {
+                    document.getElementById(`titulo-seccion${num}-input`).value = snapshot.val() || '';
+                });
+
+                get(dbRef(db, `config/seccion${num}/contenido`)).then(snapshot => {
+                    const contenido = snapshot.val() || [];
+                    const contDiv = document.getElementById(`contenido-seccion${num}-admin`);
+                    contDiv.innerHTML = '';
+                    contenido.forEach((item, index) => {
+                        addContenidoItem(contDiv, num, index, item);
+                    });
+                });
+            });
+
+            // Atajos
+            get(dbRef(db, 'config/atajos')).then(snapshot => {
+                const atajos = snapshot.val() || [];
+                const atajosList = document.getElementById('atajos-list');
+                atajosList.innerHTML = '';
+                atajos.forEach((atajo, index) => {
+                    addAtajoItem(atajosList, index, atajo);
+                });
+            });
+
+            // Redes Sociales
+            const redes = ['instagram', 'facebook', 'youtube', 'x'];
+            const redesList = document.getElementById('redes-list');
+            redesList.innerHTML = '';
+            redes.forEach(async red => {
+                get(dbRef(db, `config/redes/${red}`)).then(snapshot => {
+                    const config = snapshot.val() || { on: false, link: '', usuario: '' };
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <h3>${red.charAt(0).toUpperCase() + red.slice(1)}</h3>
+                        <label><input type="checkbox" class="red-on" data-red="${red}" ${config.on ? 'checked' : ''}> Activar</label>
+                        <input type="text" class="red-link" data-red="${red}" placeholder="Link" value="${config.link || ''}">
+                        <input type="text" class="red-usuario" data-red="${red}" placeholder="Usuario" value="${config.usuario || ''}">
+                    `;
+                    redesList.appendChild(div);
+                });
+            });
+
+            // Mantenimiento
+            get(dbRef(db, 'config/mantenimiento')).then(snapshot => {
+                document.getElementById('mantenimiento-toggle').checked = !!snapshot.val();
+            });
+
+            // Banner Imagen
+            get(dbRef(db, 'config/banner/imagen')).then(snapshot => {
+                document.getElementById('banner-imagen-input').value = snapshot.val() || '';
+            });
+        }
+
+        // Guardar Título Principal
+        document.getElementById('save-titulo-principal').addEventListener('click', () => {
+            const titulo = document.getElementById('titulo-principal-input').value;
+            set(dbRef(db, 'config/titulo_principal'), titulo).then(() => console.log('Título guardado'));
+        });
+
+        // Guardar Secciones
+        document.querySelectorAll('.save-seccion').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const num = btn.dataset.seccion;
+                const titulo = document.getElementById(`titulo-seccion${num}-input`).value;
+                const contDiv = document.getElementById(`contenido-seccion${num}-admin`);
+                const contenidos = [];
+                contDiv.querySelectorAll('.contenido-item').forEach(item => {
+                    const type = item.querySelector('.cont-type').value;
+                    const value = item.querySelector('.cont-value').value;
+                    const font = item.querySelector('.cont-font')?.value || '';
+                    const position = item.querySelector('.cont-position')?.value || 'relative';
+                    contenidos.push({ type, value, style: { font, position } });
+                });
+                set(dbRef(db, `config/seccion${num}/titulo`), titulo);
+                set(dbRef(db, `config/seccion${num}/contenido`), contenidos).then(() => console.log(`Sección ${num} guardada`));
+            });
+        });
+
+        // Agregar Contenido a Sección
+        document.querySelectorAll('.add-contenido').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const num = btn.dataset.seccion;
+                const contDiv = document.getElementById(`contenido-seccion${num}-admin`);
+                addContenidoItem(contDiv, num, contDiv.children.length, { type: 'text', value: '', style: { font: 'Arial', position: 'relative' } });
+            });
+        });
+
+        function addContenidoItem(contDiv, num, index, item) {
+            const div = document.createElement('div');
+            div.classList.add('contenido-item');
+            div.innerHTML = `
+                <select class="cont-type">
+                    <option value="text" ${item.type === 'text' ? 'selected' : ''}>Texto</option>
+                    <option value="image" ${item.type === 'image' ? 'selected' : ''}>Imagen</option>
+                    <!-- Agregar más tipos como preview si es necesario -->
+                </select>
+                <input type="text" class="cont-value" placeholder="Valor (texto o URL)" value="${item.value || ''}">
+                <input type="text" class="cont-font" placeholder="Fuente (solo para texto)" value="${item.style?.font || ''}">
+                <input type="text" class="cont-position" placeholder="Posición CSS (ej: relative, absolute)" value="${item.style?.position || 'relative'}">
+                <button class="remove-contenido">Eliminar</button>
+            `;
+            div.querySelector('.remove-contenido').addEventListener('click', () => div.remove());
+            contDiv.appendChild(div);
+        }
+
+        // Agregar Atajo
+        document.getElementById('add-atajo').addEventListener('click', () => {
+            const atajosList = document.getElementById('atajos-list');
+            if (atajosList.children.length < 6) {
+                addAtajoItem(atajosList, atajosList.children.length, { nombre: '', url: '' });
+            } else {
+                alert('Máximo 6 atajos');
+            }
+        });
+
+        function addAtajoItem(atajosList, index, atajo) {
+            const div = document.createElement('div');
+            div.classList.add('atajo-item');
+            div.innerHTML = `
+                <input type="text" class="atajo-nombre" placeholder="Nombre" value="${atajo.nombre || ''}">
+                <input type="text" class="atajo-url" placeholder="URL" value="${atajo.url || ''}">
+                <button class="remove-atajo">Eliminar</button>
+            `;
+            div.querySelector('.remove-atajo').addEventListener('click', () => div.remove());
+            atajosList.appendChild(div);
+        }
+
+        // Guardar Atajos
+        document.getElementById('save-atajos').addEventListener('click', () => {
+            const atajosList = document.getElementById('atajos-list');
+            const atajos = [];
+            atajosList.querySelectorAll('.atajo-item').forEach(item => {
+                const nombre = item.querySelector('.atajo-nombre').value;
+                const url = item.querySelector('.atajo-url').value;
+                if (nombre && url) atajos.push({ nombre, url });
+            });
+            set(dbRef(db, 'config/atajos'), atajos.slice(0, 6)).then(() => console.log('Atajos guardados'));
+        });
+
+        // Guardar Redes
+        document.getElementById('save-redes').addEventListener('click', () => {
+            const redes = ['instagram', 'facebook', 'youtube', 'x'];
+            redes.forEach(red => {
+                const on = document.querySelector(`.red-on[data-red="${red}"]`)?.checked || false;
+                const link = document.querySelector(`.red-link[data-red="${red}"]`)?.value || '';
+                const usuario = document.querySelector(`.red-usuario[data-red="${red}"]`)?.value || '';
+                set(dbRef(db, `config/redes/${red}`), { on, link, usuario });
+            });
+            console.log('Redes guardadas');
+        });
+
+        // Guardar Mantenimiento
+        document.getElementById('save-mantenimiento').addEventListener('click', () => {
+            const on = document.getElementById('mantenimiento-toggle').checked;
+            set(dbRef(db, 'config/mantenimiento'), on).then(() => console.log('Mantenimiento guardado'));
+        });
+
+        // Guardar Banner
+        document.getElementById('save-banner').addEventListener('click', () => {
+            const imgUrl = document.getElementById('banner-imagen-input').value;
+            set(dbRef(db, 'config/banner/imagen'), imgUrl).then(() => console.log('Banner guardado'));
+        });
+
+        // Nota: Para previews, puedes extender la sección de contenidos agregando tipo 'preview' con campos adicionales como id, title, image, etc.
+        // Para mover libremente, el admin setea style.position, pero el rendering en index aplica el CSS.
+        // Para subir imágenes reales, integra Firebase Storage en futuras versiones.
+    </script>
+</body>
+</html>
