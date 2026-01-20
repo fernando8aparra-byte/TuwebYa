@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
+    <title>Panel de Administración - Previsualización en Tiempo Real</title>
     <style>
-        /* Diseño inspirado en Apple para admin: minimalista, glassmorphism */
+        /* Diseño inspirado en Apple para admin: minimalista, glassmorphism, igual que index */
         @font-face {
             font-family: 'SF Pro';
             src: url('https://fonts.cdnfonts.com/css/sf-pro-display') format('woff2');
@@ -20,79 +20,140 @@
         }
 
         header {
-            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login-section {
+            margin-left: auto;
         }
 
         .hidden {
             display: none;
         }
 
+        main {
+            margin-top: 60px;
+            padding: 20px;
+        }
+
         section {
+            margin: 40px 0;
             padding: 40px;
-            margin: 20px;
             background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(20px);
             border-radius: 18px;
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            min-height: 300px;
         }
 
-        input, textarea, select, button {
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            width: 100%;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
+        section h2 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 20px;
         }
 
-        input:focus, select:focus {
-            border-color: #0071e3;
+        .edit-tools {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
         }
 
-        button {
+        .add-btn {
             background: #0071e3;
             color: white;
             border: none;
+            padding: 10px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        button:hover {
-            background: #005bb5;
-        }
-
-        .atajo-item, .contenido-item {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            cursor: move; /* Para indicar drag */
-        }
-
-        .contenido-item input {
-            width: calc(50% - 10px);
-            display: inline-block;
             margin-right: 10px;
         }
 
-        footer {
-            padding: 20px;
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .contenido-container {
+            position: relative;
+            min-height: 200px;
+        }
+
+        .draggable {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            border: 1px dashed #0071e3; /* Para indicar editable */
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .draggable:hover {
+            box-shadow: 0 2px 10px rgba(0, 113, 227, 0.3);
+        }
+
+        .draggable img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .draggable p {
+            margin: 0;
+        }
+
+        /* Otras secciones como en index */
+        #mantenimiento-banner {
+            background: #ffcc00;
             text-align: center;
+            padding: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(255, 204, 0, 0.2);
+        }
+
+        #banner {
+            text-align: center;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+
+        #banner-img {
+            max-width: 100%;
+            border-radius: 18px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        footer {
+            padding: 40px 20px;
+            background: rgba(245, 245, 247, 0.9);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>Panel de Administración</h1>
+        <h1>Panel de Administración - Previsualización</h1>
         <div class="login-section">
             <button id="login-btn">Iniciar Sesión</button>
             <div id="login-form" class="hidden">
@@ -107,64 +168,6 @@
     </header>
 
     <main id="admin-content" class="hidden">
-        <!-- Título Principal -->
-        <section id="titulo-principal-section">
-            <h2>Título Principal</h2>
-            <input type="text" id="titulo-principal-input" placeholder="Título Principal">
-            <button id="save-titulo-principal">Guardar</button>
-        </section>
-
-        <!-- Secciones 1-3 -->
-        <section id="secciones-section">
-            <h2>Secciones</h2>
-            <div id="seccion1-admin">
-                <h3>Sección 1</h3>
-                <input type="text" id="titulo-seccion1-input" placeholder="Título Sección 1">
-                <div id="contenido-seccion1-admin">
-                    <!-- Contenidos dinámicos se cargan aquí, draggeables -->
-                </div>
-                <button class="add-contenido" data-seccion="1">Agregar Contenido</button>
-                <button class="save-seccion" data-seccion="1">Guardar Sección 1</button>
-            </div>
-            <div id="seccion2-admin">
-                <h3>Sección 2</h3>
-                <input type="text" id="titulo-seccion2-input" placeholder="Título Sección 2">
-                <div id="contenido-seccion2-admin">
-                    <!-- Contenidos dinámicos se cargan aquí -->
-                </div>
-                <button class="add-contenido" data-seccion="2">Agregar Contenido</button>
-                <button class="save-seccion" data-seccion="2">Guardar Sección 2</button>
-            </div>
-            <div id="seccion3-admin">
-                <h3>Sección 3</h3>
-                <input type="text" id="titulo-seccion3-input" placeholder="Título Sección 3">
-                <div id="contenido-seccion3-admin">
-                    <!-- Contenidos dinámicos se cargan aquí -->
-                </div>
-                <button class="add-contenido" data-seccion="3">Agregar Contenido</button>
-                <button class="save-seccion" data-seccion="3">Guardar Sección 3</button>
-            </div>
-        </section>
-
-        <!-- Atajos -->
-        <section id="atajos-section">
-            <h2>Atajos (Máximo 6)</h2>
-            <div id="atajos-list">
-                <!-- Atajos dinámicos se cargan aquí -->
-            </div>
-            <button id="add-atajo">Agregar Atajo</button>
-            <button id="save-atajos">Guardar Atajos</button>
-        </section>
-
-        <!-- Redes Sociales -->
-        <section id="redes-section">
-            <h2>Redes Sociales</h2>
-            <div id="redes-list">
-                <!-- Redes dinámicas -->
-            </div>
-            <button id="save-redes">Guardar Redes</button>
-        </section>
-
         <!-- Banner de Mantenimiento -->
         <section id="mantenimiento-section">
             <h2>Banner de Mantenimiento</h2>
@@ -180,6 +183,60 @@
             <input type="text" id="banner-imagen-input" placeholder="URL de la Imagen">
             <button id="save-banner">Guardar</button>
         </section>
+
+        <!-- Título Principal -->
+        <section id="titulo-principal-section">
+            <h2>Título Principal</h2>
+            <input type="text" id="titulo-principal-input" placeholder="Título Principal">
+            <button id="save-titulo-principal">Guardar</button>
+        </section>
+
+        <!-- Secciones con Previsualización Editable -->
+        <section id="seccion1">
+            <h2 id="titulo-seccion1">Cargando Sección 1...</h2>
+            <div class="edit-tools">
+                <button class="add-btn" data-seccion="1">Agregar Contenido</button>
+                <button class="save-btn" data-seccion="1">Guardar Sección 1</button>
+            </div>
+            <div id="contenido-seccion1" class="contenido-container"></div>
+        </section>
+
+        <section id="seccion2">
+            <h2 id="titulo-seccion2">Cargando Sección 2...</h2>
+            <div class="edit-tools">
+                <button class="add-btn" data-seccion="2">Agregar Contenido</button>
+                <button class="save-btn" data-seccion="2">Guardar Sección 2</button>
+            </div>
+            <div id="contenido-seccion2" class="contenido-container"></div>
+        </section>
+
+        <section id="seccion3">
+            <h2 id="titulo-seccion3">Cargando Sección 3...</h2>
+            <div class="edit-tools">
+                <button class="add-btn" data-seccion="3">Agregar Contenido</button>
+                <button class="save-btn" data-seccion="3">Guardar Sección 3</button>
+            </div>
+            <div id="contenido-seccion3" class="contenido-container"></div>
+        </section>
+
+        <!-- Atajos -->
+        <section id="atajos-section">
+            <h2>Atajos (Máximo 6)</h2>
+            <div id="atajos-list">
+                <!-- Atajos dinámicos -->
+            </div>
+            <button id="add-atajo">Agregar Atajo</button>
+            <button id="save-atajos">Guardar Atajos</button>
+        </section>
+
+        <!-- Redes Sociales -->
+        <section id="redes-section">
+            <h2>Redes Sociales</h2>
+            <div id="redes-list">
+                <!-- Redes dinámicas -->
+            </div>
+            <button id="save-redes">Guardar Redes</button>
+        </section>
     </main>
 
     <script type="module">
@@ -188,13 +245,14 @@
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
         import { getDatabase, ref as dbRef, get, set, push, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, OAuthProvider } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyCSu34Ls6HzmX1ANI19KPzttAKTqf5bDxY",
           authDomain: "tuwebyaa-da5a4.firebaseapp.com",
           projectId: "tuwebyaa-da5a4",
-          storageBucket: "tuwebyaa-da5a4.firebasestorage.app",
+          storageBucket: "tuwebyaa-da5a4.appspot.com",
           messagingSenderId: "978686266841",
           appId: "1:978686266841:web:33ffcb2ff2965589151dc8",
           measurementId: "G-X1FY1MR0M7"
@@ -205,6 +263,7 @@
         const analytics = getAnalytics(app);
         const db = getDatabase(app);
         const auth = getAuth(app);
+        const storage = getStorage(app);
 
         const adminContent = document.getElementById('admin-content');
         const loginBtn = document.getElementById('login-btn');
@@ -276,32 +335,25 @@
             }).catch(error => console.error('Error en logout:', error));
         });
 
-        // Función para cargar datos iniciales en el admin
+        // Cargar datos iniciales y renderizar previsualización
         async function loadAdminData() {
             // Título Principal
             get(dbRef(db, 'config/titulo_principal')).then(snapshot => {
                 document.getElementById('titulo-principal-input').value = snapshot.val() || '';
             });
 
-            // Secciones
+            // Secciones con previsualización
             ['1', '2', '3'].forEach(async num => {
                 get(dbRef(db, `config/seccion${num}/titulo`)).then(snapshot => {
-                    document.getElementById(`titulo-seccion${num}-input`).value = snapshot.val() || '';
+                    document.getElementById(`titulo-seccion${num}`).textContent = snapshot.val() || `Sección ${num}`;
                 });
 
                 get(dbRef(db, `config/seccion${num}/contenido`)).then(snapshot => {
                     const contenido = snapshot.val() || [];
-                    const contDiv = document.getElementById(`contenido-seccion${num}-admin`);
+                    const contDiv = document.getElementById(`contenido-seccion${num}`);
                     contDiv.innerHTML = '';
-                    contenido.forEach((item, index) => {
-                        addContenidoItem(contDiv, num, index, item);
-                    });
-                    // Hacer sortable para reorder
-                    new Sortable(contDiv, {
-                        animation: 150,
-                        ghostClass: 'sortable-ghost',
-                        chosenClass: 'sortable-chosen',
-                        dragClass: 'sortable-drag'
+                    contenido.forEach(item => {
+                        addElementToPreview(contDiv, item);
                     });
                 });
             });
@@ -351,103 +403,124 @@
             set(dbRef(db, 'config/titulo_principal'), titulo).then(() => console.log('Título guardado'));
         });
 
-        // Guardar Secciones
-        document.querySelectorAll('.save-seccion').forEach(btn => {
+        // Agregar Contenido (texto o imagen)
+        document.querySelectorAll('.add-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const num = btn.dataset.seccion;
-                const titulo = document.getElementById(`titulo-seccion${num}-input`).value;
-                const contDiv = document.getElementById(`contenido-seccion${num}-admin`);
-                const contenidos = [];
-                contDiv.querySelectorAll('.contenido-item').forEach(item => {
-                    const type = item.querySelector('.cont-type').value;
-                    const value = item.querySelector('.cont-value').value;
-                    const font = item.querySelector('.cont-font')?.value || '';
-                    const position = item.querySelector('.cont-position').value || 'relative';
-                    const left = item.querySelector('.cont-left').value || '0';
-                    const top = item.querySelector('.cont-top').value || '0';
-                    const width = item.querySelector('.cont-width').value || 'auto';
-                    const height = item.querySelector('.cont-height').value || 'auto';
-                    contenidos.push({ type, value, style: { font, position, left, top, width, height } });
+                const type = prompt('Elige tipo: "text" o "image"');
+                if (type === 'text') {
+                    const value = prompt('Ingresa el texto:');
+                    if (value) {
+                        const item = { type: 'text', value, style: { font: 'SF Pro', position: 'absolute', left: '0px', top: '0px', width: 'auto', height: 'auto' } };
+                        addElementToPreview(document.getElementById(`contenido-seccion${num}`), item);
+                    }
+                } else if (type === 'image') {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const storageReference = storageRef(storage, 'images/' + file.name);
+                            await uploadBytes(storageReference, file);
+                            const url = await getDownloadURL(storageReference);
+                            const item = { type: 'image', value: url, style: { position: 'absolute', left: '0px', top: '0px', width: '200px', height: 'auto' } };
+                            addElementToPreview(document.getElementById(`contenido-seccion${num}`), item);
+                        }
+                    };
+                    input.click();
+                }
+            });
+        });
+
+        // Función para agregar elemento a previsualización y hacerlo draggable/resizable
+        function addElementToPreview(contDiv, item) {
+            let elem;
+            if (item.type === 'text') {
+                elem = document.createElement('p');
+                elem.textContent = item.value;
+                elem.classList.add('draggable');
+                elem.style.fontFamily = item.style.font;
+                elem.style.position = item.style.position;
+                elem.style.left = item.style.left;
+                elem.style.top = item.style.top;
+                elem.style.width = item.style.width;
+                elem.style.height = item.style.height;
+                elem.style.margin = '0';
+                elem.style.padding = '5px';
+                elem.style.background = 'transparent';
+            } else if (item.type === 'image') {
+                elem = document.createElement('div'); // Contenedor para resize
+                elem.classList.add('draggable');
+                const img = document.createElement('img');
+                img.src = item.value;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                elem.appendChild(img);
+                elem.style.position = item.style.position;
+                elem.style.left = item.style.left;
+                elem.style.top = item.style.top;
+                elem.style.width = item.style.width;
+                elem.style.height = item.style.height;
+            }
+            contDiv.appendChild(elem);
+
+            // Hacer draggable y resizable
+            interact(elem)
+                .draggable({
+                    listeners: {
+                        move(event) {
+                            const target = event.target;
+                            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                            target.style.left = `${x}px`;
+                            target.style.top = `${y}px`;
+                            target.setAttribute('data-x', x);
+                            target.setAttribute('data-y', y);
+                        }
+                    }
+                })
+                .resizable({
+                    edges: { left: true, right: true, bottom: true, top: true },
+                    listeners: {
+                        move(event) {
+                            const target = event.target;
+                            let x = parseFloat(target.getAttribute('data-x')) || 0;
+                            let y = parseFloat(target.getAttribute('data-y')) || 0;
+                            target.style.width = `${event.rect.width}px`;
+                            target.style.height = `${event.rect.height}px`;
+                            x += event.deltaRect.left;
+                            y += event.deltaRect.top;
+                            target.style.left = `${x}px`;
+                            target.style.top = `${y}px`;
+                            target.setAttribute('data-x', x);
+                            target.setAttribute('data-y', y);
+                        }
+                    }
                 });
-                set(dbRef(db, `config/seccion${num}/titulo`), titulo);
+        }
+
+        // Guardar Secciones (extraer posiciones y guardar en Firebase)
+        document.querySelectorAll('.save-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const num = btn.dataset.seccion;
+                const contDiv = document.getElementById(`contenido-seccion${num}`);
+                const contenidos = [];
+                contDiv.querySelectorAll('.draggable').forEach(elem => {
+                    const type = elem.tagName === 'P' ? 'text' : 'image';
+                    const value = type === 'text' ? elem.textContent : elem.querySelector('img').src;
+                    const style = {
+                        font: elem.style.fontFamily,
+                        position: elem.style.position,
+                        left: elem.style.left,
+                        top: elem.style.top,
+                        width: elem.style.width,
+                        height: elem.style.height
+                    };
+                    contenidos.push({ type, value, style });
+                });
                 set(dbRef(db, `config/seccion${num}/contenido`), contenidos).then(() => console.log(`Sección ${num} guardada`));
             });
-        });
-
-        // Agregar Contenido a Sección
-        document.querySelectorAll('.add-contenido').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const num = btn.dataset.seccion;
-                const contDiv = document.getElementById(`contenido-seccion${num}-admin`);
-                addContenidoItem(contDiv, num, contDiv.children.length, { type: 'text', value: '', style: { font: 'SF Pro', position: 'relative', left: '0', top: '0', width: 'auto', height: 'auto' } });
-            });
-        });
-
-        function addContenidoItem(contDiv, num, index, item) {
-            const div = document.createElement('div');
-            div.classList.add('contenido-item');
-            div.innerHTML = `
-                <select class="cont-type">
-                    <option value="text" ${item.type === 'text' ? 'selected' : ''}>Texto</option>
-                    <option value="image" ${item.type === 'image' ? 'selected' : ''}>Imagen</option>
-                </select>
-                <input type="text" class="cont-value" placeholder="Valor (texto o URL)" value="${item.value || ''}">
-                <input type="text" class="cont-font" placeholder="Fuente (solo para texto)" value="${item.style?.font || ''}">
-                <input type="text" class="cont-position" placeholder="Posición (relative/absolute)" value="${item.style?.position || 'relative'}">
-                <input type="text" class="cont-left" placeholder="Left (px)" value="${item.style?.left || '0'}">
-                <input type="text" class="cont-top" placeholder="Top (px)" value="${item.style?.top || '0'}">
-                <input type="text" class="cont-width" placeholder="Width (px/auto)" value="${item.style?.width || 'auto'}">
-                <input type="text" class="cont-height" placeholder="Height (px/auto)" value="${item.style?.height || 'auto'}">
-                <button class="remove-contenido">Eliminar</button>
-            `;
-            div.querySelector('.remove-contenido').addEventListener('click', () => div.remove());
-            contDiv.appendChild(div);
-        }
-
-        // Agregar Atajo
-        document.getElementById('add-atajo').addEventListener('click', () => {
-            const atajosList = document.getElementById('atajos-list');
-            if (atajosList.children.length < 6) {
-                addAtajoItem(atajosList, atajosList.children.length, { nombre: '', url: '' });
-            } else {
-                alert('Máximo 6 atajos');
-            }
-        });
-
-        function addAtajoItem(atajosList, index, atajo) {
-            const div = document.createElement('div');
-            div.classList.add('atajo-item');
-            div.innerHTML = `
-                <input type="text" class="atajo-nombre" placeholder="Nombre" value="${atajo.nombre || ''}">
-                <input type="text" class="atajo-url" placeholder="URL" value="${atajo.url || ''}">
-                <button class="remove-atajo">Eliminar</button>
-            `;
-            div.querySelector('.remove-atajo').addEventListener('click', () => div.remove());
-            atajosList.appendChild(div);
-        }
-
-        // Guardar Atajos
-        document.getElementById('save-atajos').addEventListener('click', () => {
-            const atajosList = document.getElementById('atajos-list');
-            const atajos = [];
-            atajosList.querySelectorAll('.atajo-item').forEach(item => {
-                const nombre = item.querySelector('.atajo-nombre').value;
-                const url = item.querySelector('.atajo-url').value;
-                if (nombre && url) atajos.push({ nombre, url });
-            });
-            set(dbRef(db, 'config/atajos'), atajos.slice(0, 6)).then(() => console.log('Atajos guardados'));
-        });
-
-        // Guardar Redes
-        document.getElementById('save-redes').addEventListener('click', () => {
-            const redes = ['instagram', 'facebook', 'youtube', 'x'];
-            redes.forEach(red => {
-                const on = document.querySelector(`.red-on[data-red="${red}"]`)?.checked || false;
-                const link = document.querySelector(`.red-link[data-red="${red}"]`)?.value || '';
-                const usuario = document.querySelector(`.red-usuario[data-red="${red}"]`)?.value || '';
-                set(dbRef(db, `config/redes/${red}`), { on, link, usuario });
-            });
-            console.log('Redes guardadas');
         });
 
         // Guardar Mantenimiento
@@ -462,7 +535,7 @@
             set(dbRef(db, 'config/banner/imagen'), imgUrl).then(() => console.log('Banner guardado'));
         });
 
-        // Nota: Ahora el admin permite posicionamiento libre con left, top, width, height. Y reorder con drag-and-drop usando Sortable.js.
+        // Nota: Para atajos y redes, mantener como antes. El admin ahora es una previsualización editable de las secciones.
     </script>
 </body>
 </html>
