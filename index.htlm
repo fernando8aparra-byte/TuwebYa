@@ -1,1 +1,92 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitio para Vender Páginas Web</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <!-- Menú Hamburguesa -->
+        <div class="hamburger-menu">
+            <button id="hamburger-btn">☰</button>
+            <nav id="nav-menu" class="hidden">
+                <ul>
+                    <li><a href="#seccion1">Sección 1</a></li>
+                    <li><a href="#seccion2">Sección 2</a></li>
+                    <li><a href="#seccion3">Sección 3</a></li>
+                    <!-- Atajos dinámicos se agregarán aquí -->
+                </ul>
+            </nav>
+        </div>
 
+        <!-- Barra de Búsquedas -->
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Buscar previews de páginas...">
+            <button id="search-btn">Buscar</button>
+            <div id="search-results" class="hidden"></div>
+        </div>
+
+        <!-- Iniciar Sesión -->
+        <div class="login-section">
+            <button id="login-btn">Iniciar Sesión</button>
+            <div id="login-form" class="hidden">
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="password" placeholder="Contraseña">
+                <button id="submit-login">Entrar</button>
+                <button id="logout-btn" class="hidden">Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <!-- Título Principal -->
+        <h1 id="titulo-principal">Cargando Título...</h1>
+    </header>
+
+    <!-- Banner de Mantenimiento (oculto por default) -->
+    <div id="mantenimiento-banner" class="hidden">
+        <p>Página en Mantenimiento</p>
+    </div>
+
+    <!-- Banner con Imagen -->
+    <div id="banner">
+        <img id="banner-img" src="" alt="Banner">
+    </div>
+
+    <!-- Secciones Principales -->
+    <main>
+        <section id="seccion1">
+            <h2 id="titulo-seccion1">Cargando Sección 1...</h2>
+            <!-- Contenido dinámico: previews, textos, etc. -->
+            <div id="contenido-seccion1"></div>
+        </section>
+
+        <section id="seccion2">
+            <h2 id="titulo-seccion2">Cargando Sección 2...</h2>
+            <div id="contenido-seccion2"></div>
+        </section>
+
+        <section id="seccion3">
+            <h2 id="titulo-seccion3">Cargando Sección 3...</h2>
+            <div id="contenido-seccion3"></div>
+        </section>
+    </main>
+
+    <!-- Atajos (se renderizan en menú, pero lista base aquí para referencia) -->
+    <div id="atajos-container" class="hidden">
+        <!-- Atajos dinámicos -->
+    </div>
+
+    <!-- Redes Sociales -->
+    <footer>
+        <div id="redes-sociales">
+            <!-- Icons dinámicos -->
+        </div>
+    </footer>
+</body>
+</html>
