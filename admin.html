@@ -32,6 +32,7 @@
             border: 1px solid black;
             padding: 5px;
             margin: 5px 0;
+            display: block;
         }
 
         .atajo-item, .contenido-item {
@@ -54,7 +55,9 @@
             <div id="login-form" class="hidden">
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="password" placeholder="Contraseña">
-                <button id="submit-login">Entrar</button>
+                <button id="submit-login">Entrar con Email</button>
+                <button id="google-login">Iniciar Sesión con Google</button>
+                <button id="apple-login">Iniciar Sesión con Apple</button>
             </div>
             <button id="logout-btn" class="hidden">Cerrar Sesión</button>
         </div>
@@ -141,7 +144,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
         import { getDatabase, ref as dbRef, get, set, push, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, OAuthProvider } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -166,12 +169,14 @@
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const submitLogin = document.getElementById('submit-login');
+        const googleLogin = document.getElementById('google-login');
+        const appleLogin = document.getElementById('apple-login');
         const logoutBtn = document.getElementById('logout-btn');
 
         // Monitorear estado de autenticación
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Asumimos que cualquier usuario logueado es admin por simplicidad
+            if (user && user.email === 'fernando8aparra@gmail.com') {
+                // Solo este email es admin
                 adminContent.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
                 logoutBtn.classList.remove('hidden');
@@ -180,6 +185,11 @@
                 adminContent.classList.add('hidden');
                 loginBtn.classList.remove('hidden');
                 logoutBtn.classList.add('hidden');
+                if (user) {
+                    // Si no es admin, logout automático
+                    signOut(auth);
+                    alert('Acceso denegado. Solo fernando8aparra@gmail.com es admin.');
+                }
             }
         });
 
@@ -192,10 +202,31 @@
             const password = passwordInput.value;
             signInWithEmailAndPassword(auth, email, password)
                 .then(userCredential => {
-                    console.log('Admin logueado');
+                    console.log('Admin logueado con email');
                     loginForm.classList.add('hidden');
                 })
-                .catch(error => console.error('Error en login:', error));
+                .catch(error => console.error('Error en login con email:', error));
+        });
+
+        googleLogin.addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider)
+                .then(userCredential => {
+                    console.log('Admin logueado con Google');
+                    loginForm.classList.add('hidden');
+                })
+                .catch(error => console.error('Error en login con Google:', error));
+        });
+
+        appleLogin.addEventListener('click', () => {
+            const provider = new OAuthProvider('apple.com');
+            provider.addScope('email name');
+            signInWithPopup(auth, provider)
+                .then(userCredential => {
+                    console.log('Admin logueado con Apple');
+                    loginForm.classList.add('hidden');
+                })
+                .catch(error => console.error('Error en login con Apple:', error));
         });
 
         logoutBtn.addEventListener('click', () => {
@@ -376,8 +407,9 @@
             set(dbRef(db, 'config/banner/imagen'), imgUrl).then(() => console.log('Banner guardado'));
         });
 
-        // Nota: Para previews, puedes extender la sección de contenidos agregando tipo 'preview' con campos adicionales como id, title, image, etc.
-        // Para mover libremente, el admin setea style.position, pero el rendering en index aplica el CSS.
+        // Nota: Asegúrate de haber configurado los providers de Google y Apple en tu consola de Firebase.
+        // Para Apple, necesitas configurar el Service ID, etc., en Apple Developer y Firebase.
+        // Para previews, puedes extender la sección de contenidos agregando tipo 'preview' con campos adicionales.
         // Para subir imágenes reales, integra Firebase Storage en futuras versiones.
     </script>
 </body>
