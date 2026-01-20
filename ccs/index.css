@@ -1,1 +1,105 @@
+/* styles.css */
+/* Diseño básico en blanco y negro, sin estética avanzada */
 
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    color: black;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid black;
+}
+
+.hamburger-menu button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#nav-menu {
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background: white;
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.search-bar {
+    display: flex;
+}
+
+#search-input {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+#search-btn {
+    border: 1px solid black;
+    background: white;
+    cursor: pointer;
+}
+
+#search-results {
+    position: absolute;
+    background: white;
+    border: 1px solid black;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.login-section button {
+    border: 1px solid black;
+    background: white;
+    cursor: pointer;
+}
+
+#login-form {
+    position: absolute;
+    background: white;
+    border: 1px solid black;
+    padding: 10px;
+}
+
+#mantenimiento-banner {
+    background: yellow; /* Para visibilidad, pero básico */
+    text-align: center;
+    padding: 10px;
+}
+
+#banner {
+    text-align: center;
+}
+
+#banner-img {
+    max-width: 100%;
+}
+
+section {
+    padding: 20px;
+    border-bottom: 1px solid black;
+}
+
+footer {
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid black;
+}
+
+#redes-sociales a {
+    margin: 0 10px;
+    color: black;
+    text-decoration: none;
+}
