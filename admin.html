@@ -5,18 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
     <style>
-        /* Diseño básico en blanco y negro, sin estética avanzada */
+        /* Diseño inspirado en Apple para admin: minimalista, glassmorphism */
+        @font-face {
+            font-family: 'SF Pro';
+            src: url('https://fonts.cdnfonts.com/css/sf-pro-display') format('woff2');
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: white;
-            color: black;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
         }
 
         header {
-            padding: 10px;
-            border-bottom: 1px solid black;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .hidden {
@@ -24,28 +31,64 @@
         }
 
         section {
-            padding: 20px;
-            border-bottom: 1px solid black;
+            padding: 40px;
+            margin: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 18px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         input, textarea, select, button {
-            border: 1px solid black;
-            padding: 5px;
-            margin: 5px 0;
-            display: block;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #0071e3;
+        }
+
+        button {
+            background: #0071e3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #005bb5;
         }
 
         .atajo-item, .contenido-item {
-            border: 1px solid gray;
-            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 15px;
             margin: 10px 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            cursor: move; /* Para indicar drag */
+        }
+
+        .contenido-item input {
+            width: calc(50% - 10px);
+            display: inline-block;
+            margin-right: 10px;
         }
 
         footer {
-            padding: 10px;
+            padding: 20px;
             text-align: center;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
     <header>
@@ -78,7 +121,7 @@
                 <h3>Sección 1</h3>
                 <input type="text" id="titulo-seccion1-input" placeholder="Título Sección 1">
                 <div id="contenido-seccion1-admin">
-                    <!-- Contenidos dinámicos se cargan aquí -->
+                    <!-- Contenidos dinámicos se cargan aquí, draggeables -->
                 </div>
                 <button class="add-contenido" data-seccion="1">Agregar Contenido</button>
                 <button class="save-seccion" data-seccion="1">Guardar Sección 1</button>
@@ -176,7 +219,6 @@
         // Monitorear estado de autenticación
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === 'fernando8aparra@gmail.com') {
-                // Solo este email es admin
                 adminContent.classList.remove('hidden');
                 loginBtn.classList.add('hidden');
                 logoutBtn.classList.remove('hidden');
@@ -186,7 +228,6 @@
                 loginBtn.classList.remove('hidden');
                 logoutBtn.classList.add('hidden');
                 if (user) {
-                    // Si no es admin, logout automático
                     signOut(auth);
                     alert('Acceso denegado. Solo fernando8aparra@gmail.com es admin.');
                 }
@@ -255,6 +296,13 @@
                     contenido.forEach((item, index) => {
                         addContenidoItem(contDiv, num, index, item);
                     });
+                    // Hacer sortable para reorder
+                    new Sortable(contDiv, {
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        chosenClass: 'sortable-chosen',
+                        dragClass: 'sortable-drag'
+                    });
                 });
             });
 
@@ -314,8 +362,12 @@
                     const type = item.querySelector('.cont-type').value;
                     const value = item.querySelector('.cont-value').value;
                     const font = item.querySelector('.cont-font')?.value || '';
-                    const position = item.querySelector('.cont-position')?.value || 'relative';
-                    contenidos.push({ type, value, style: { font, position } });
+                    const position = item.querySelector('.cont-position').value || 'relative';
+                    const left = item.querySelector('.cont-left').value || '0';
+                    const top = item.querySelector('.cont-top').value || '0';
+                    const width = item.querySelector('.cont-width').value || 'auto';
+                    const height = item.querySelector('.cont-height').value || 'auto';
+                    contenidos.push({ type, value, style: { font, position, left, top, width, height } });
                 });
                 set(dbRef(db, `config/seccion${num}/titulo`), titulo);
                 set(dbRef(db, `config/seccion${num}/contenido`), contenidos).then(() => console.log(`Sección ${num} guardada`));
@@ -327,7 +379,7 @@
             btn.addEventListener('click', () => {
                 const num = btn.dataset.seccion;
                 const contDiv = document.getElementById(`contenido-seccion${num}-admin`);
-                addContenidoItem(contDiv, num, contDiv.children.length, { type: 'text', value: '', style: { font: 'Arial', position: 'relative' } });
+                addContenidoItem(contDiv, num, contDiv.children.length, { type: 'text', value: '', style: { font: 'SF Pro', position: 'relative', left: '0', top: '0', width: 'auto', height: 'auto' } });
             });
         });
 
@@ -338,11 +390,14 @@
                 <select class="cont-type">
                     <option value="text" ${item.type === 'text' ? 'selected' : ''}>Texto</option>
                     <option value="image" ${item.type === 'image' ? 'selected' : ''}>Imagen</option>
-                    <!-- Agregar más tipos como preview si es necesario -->
                 </select>
                 <input type="text" class="cont-value" placeholder="Valor (texto o URL)" value="${item.value || ''}">
                 <input type="text" class="cont-font" placeholder="Fuente (solo para texto)" value="${item.style?.font || ''}">
-                <input type="text" class="cont-position" placeholder="Posición CSS (ej: relative, absolute)" value="${item.style?.position || 'relative'}">
+                <input type="text" class="cont-position" placeholder="Posición (relative/absolute)" value="${item.style?.position || 'relative'}">
+                <input type="text" class="cont-left" placeholder="Left (px)" value="${item.style?.left || '0'}">
+                <input type="text" class="cont-top" placeholder="Top (px)" value="${item.style?.top || '0'}">
+                <input type="text" class="cont-width" placeholder="Width (px/auto)" value="${item.style?.width || 'auto'}">
+                <input type="text" class="cont-height" placeholder="Height (px/auto)" value="${item.style?.height || 'auto'}">
                 <button class="remove-contenido">Eliminar</button>
             `;
             div.querySelector('.remove-contenido').addEventListener('click', () => div.remove());
@@ -407,10 +462,7 @@
             set(dbRef(db, 'config/banner/imagen'), imgUrl).then(() => console.log('Banner guardado'));
         });
 
-        // Nota: Asegúrate de haber configurado los providers de Google y Apple en tu consola de Firebase.
-        // Para Apple, necesitas configurar el Service ID, etc., en Apple Developer y Firebase.
-        // Para previews, puedes extender la sección de contenidos agregando tipo 'preview' con campos adicionales.
-        // Para subir imágenes reales, integra Firebase Storage en futuras versiones.
+        // Nota: Ahora el admin permite posicionamiento libre con left, top, width, height. Y reorder con drag-and-drop usando Sortable.js.
     </script>
 </body>
 </html>
